@@ -17,5 +17,8 @@ plt.title('Relação entre Temperatura e Vendas de Sorvete')
 plt.legend()
 plt.grid(True)
 
+X = np.vstack((temperatura)).T
+y = np.array(vendas_sorvete).reshape(-1, 1)
+
 ## Mostrar o gráfico
 plt.show()
