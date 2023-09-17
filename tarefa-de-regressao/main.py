@@ -18,7 +18,7 @@ TITULOS_EIXOS = {
 }
 
 #3.Assim, defina essa quantidade de rodadas com o valor 1000.
-RODADAS_DE_TREINAMENTO = 1000
+RODADAS_DE_TREINAMENTO = 1
 
 #1.Extração de dados para visualização dos dados com um gráfico de dispressão
 Data = np.loadtxt("base-de-dados/Ice_cream selling data.csv",delimiter=',', skiprows = 1)
@@ -38,8 +38,23 @@ MQO_REGULARIZADO = [] #Modelo sem interceptor (MQO regularizado)
 
 MSE_MEDIA = [] #Modelo: Média de valores observáveis
 
-print(X, "temperatura")
-print(Y, "vendas")
+
+for r in range(RODADAS_DE_TREINAMENTO):
+    indexRandom = np.random.permutation(N)
+    indexOfOitentaPorCento = int(N*.8)
+    #Embaralhar dados
+    X_embaralhado = X[indexRandom,:]
+    Y_embaralhado = Y[indexRandom,:]
+
+    #Amostra para treino e teste 
+    X_treino = X_embaralhado[0: indexOfOitentaPorCento,:] #Ir de Zero até o index 80% total (no caso é 39)
+    Y_treino = Y_embaralhado[0: indexOfOitentaPorCento,:]
+    X_teste =  X_embaralhado[indexOfOitentaPorCento: N,:] #Ir do ultimo index que representa os 80% até o fim
+    Y_teste =  Y_embaralhado[indexOfOitentaPorCento: N,:]
+
+    
+    print(X_teste.shape)
+    print(Y_teste.shape)
 
 #1. Plotando grafico
 criarGrafico(
