@@ -25,12 +25,18 @@ Data = np.loadtxt("base-de-dados/Ice_cream selling data.csv",delimiter=',', skip
 temperatura = Data[:, 0]  # Armazena a primeira coluna em coluna1
 vendas_sorvete = Data[:, 1]
 
+#2. Definição dos shapes para cada estrutura de dado
 N = temperatura.shape[0]
 p = 1
 X = temperatura.copy().reshape(N,p)
 Y = vendas_sorvete.copy().reshape(N, 1)
 
-##y = np.array(vendas_sorvete).reshape(-1, 1)
+#4.
+MQO_TRADICIONAL = [] #Modelo com intercepitor
+
+MQO_REGULARIZADO = [] #Modelo sem interceptor (MQO regularizado)
+
+MSE_MEDIA = [] #Modelo: Média de valores observáveis
 
 print(X, "temperatura")
 print(Y, "vendas")
