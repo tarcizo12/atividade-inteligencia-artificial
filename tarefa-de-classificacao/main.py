@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from sklearn.metrics import accuracy_score
 
 # Vamos supor que o arquivo está no mesmo diretório do script e se chama 'dados.csv'
 df = pd.read_csv('./base-de-dados/EMG.csv', header=None,
@@ -74,5 +75,8 @@ for rodada in range(RODADAS_DE_TREINAMENTO):
     interceptorTreino = np.ones((sizeX_treino , 1)) 
     X_treino = np.concatenate((interceptorTreino , X_treino),axis=1)
     MODELO_MQO_TRADICIONAL = np.linalg.pinv(X_treino.T@X_treino)@X_treino.T@Y_treino
+
+    print(discriminante2)
+
 
 #print(X.shape)
