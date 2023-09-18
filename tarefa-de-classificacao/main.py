@@ -7,8 +7,7 @@ df = pd.read_csv('./base-de-dados/EMG.csv', header=None,
 
 # Identificar a expressão correspondente a cada bloco de 10.000 observações
 expressoes = ['Neutro', 'Sorrindo', 'Aberto', 'Surpreso', 'Rabugento']
-expressoes_repetidas = [
-    expressao for expressao in expressoes for _ in range(10000)]
+expressoes_repetidas = [expressao for expressao in expressoes for _ in range(10000)]
 
 # Adicionar a coluna de expressões ao DataFrame
 df['Expressao'] = expressoes_repetidas

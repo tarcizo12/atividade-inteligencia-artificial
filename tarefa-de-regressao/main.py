@@ -30,7 +30,7 @@ def criarTabela(valores, labelX, labelY,labelZ, title):
 
 def definirAlphaMinimo(rodadasDeTreino, X, Y):
     # Gere N valores no intervalo 0 < λ ≤ 1
-    valoresParaAlpha = np.random.uniform(0.001, 1.0, rodadasDeTreino)
+    valoresParaAlpha =  np.arange(0.001, 1.001, 0.001) 
     alphaMinimo = -1
     minValue = 100000
 
