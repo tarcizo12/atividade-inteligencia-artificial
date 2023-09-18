@@ -58,7 +58,10 @@ def definirAlphaMinimo(rodadasDeTreino, X, Y):
         mediaAlphaAtual = np.mean(mediaEQM)
 
         if(mediaAlphaAtual < minValue):
+            minValue = mediaAlphaAtual
             alphaMinimo = alphaAtual
+
+    print(alphaMinimo)
     return alphaMinimo
 
 TITULOS_EIXOS = {
