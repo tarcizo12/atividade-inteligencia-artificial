@@ -58,7 +58,7 @@ def definirAlphaMinimo(rodadasDeTreino, X, Y):
         mediaAlphaAtual = np.mean(mediaEQM)
 
         if(mediaAlphaAtual < minValue):
-            alphaMinimo = alphaAtual 
+            alphaMinimo = alphaAtual
     return alphaMinimo
 
 TITULOS_EIXOS = {
@@ -67,7 +67,7 @@ TITULOS_EIXOS = {
 }
 
 #3.Assim, defina essa quantidade de rodadas com o valor 1000.
-RODADAS_DE_TREINAMENTO = 5
+RODADAS_DE_TREINAMENTO = 100
 
 #1.Extração de dados para visualização dos dados com um gráfico de dispressão
 Data = np.loadtxt("base-de-dados/Ice_cream selling data.csv",delimiter=',', skiprows = 1)
@@ -83,7 +83,7 @@ Y = vendas_sorvete.copy().reshape(N, 1)
 #4.
 MQO_TRADICIONAL = [] #Modelo com intercepitor
 
-MQO_REGULARIZADO = [] #to do
+MQO_REGULARIZADO = [] #Modelo regularizado com lambda
 
 MSE_MEDIA = [] #Modelo: Média de valores observáveis
 
@@ -92,7 +92,6 @@ alphaMinimo = definirAlphaMinimo(RODADAS_DE_TREINAMENTO, X, Y)
 for r in range(RODADAS_DE_TREINAMENTO):
     indexRandom = np.random.permutation(N)
     indexOfOitentaPorCento = int(N*.8)
-    zero = np.zeros((1,1))
 
     #6. Embaralhar dados
     X_embaralhado = X[indexRandom,:]
@@ -160,7 +159,7 @@ maiorValor_MQO_REGULARIZADO = np.amax(MQO_REGULARIZADO)
 # print(menorValor_MQO_TRADICIONAL, maiorValor_MQO_TRADICIONAL, "Menor e maior valor para MQO tradicional \n")
 
 
-iniciarTabelasInformativas = True
+iniciarTabelasInformativas = False
 iniciarGraficoDispresao = False
 #1. Plotando grafico
 criarGraficoDispressao(

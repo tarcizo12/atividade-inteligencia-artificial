@@ -48,11 +48,20 @@ if(False):
 
 
 # 2
-RODADAS_DE_TREINAMENTO = 1
+RODADAS_DE_TREINAMENTO = 5
 
 ##Modelos para implementação
 MQO_TRADICIONAL = [] #Modelo com intercepitor
 MQO_REGULARIZADO = []
+
+X = np.concatenate((
+np.ones((N, 1)), X
+), axis=1) #interceptor
+
+melhorAlpha = 1.0
+
+acuracia_MQO_TRADICIONAL = []
+acuracia_MQO_REGULARIZADO = []
 
 for rodada in range(RODADAS_DE_TREINAMENTO):
     indexRandom = np.random.permutation(N)
@@ -70,13 +79,20 @@ for rodada in range(RODADAS_DE_TREINAMENTO):
     Y_teste =  Y_embaralhado[indexOfOitentaPorCento: N,:]
 
 
-    #Modelo MQO tradicionao - com interceptor
-    sizeX_treino = X_treino.shape[0]
-    interceptorTreino = np.ones((sizeX_treino , 1)) 
-    X_treino = np.concatenate((interceptorTreino , X_treino),axis=1)
-    MODELO_MQO_TRADICIONAL = np.linalg.pinv(X_treino.T@X_treino)@X_treino.T@Y_treino
 
-    print(discriminante2)
+    #Modelo MQO tradicionao - com interceptor
+    MODELO_MQO_TRADICIONAL = np.linalg.pinv(X_treino.T@X_treino)@X_treino.T@Y_treino
+    Y_predicao = X_teste @ MODELO_MQO_TRADICIONAL
+
+    descriminante_predicao = np.argmax(Y_predicao, axis=1)
+    descriminante_teste = np.argmax(Y_teste, axis=1)
+    acuracia_mqo_tradicional = accuracy_score(descriminante_predicao, descriminante_teste)
+    acuracia_MQO_TRADICIONAL.append(acuracia_mqo_tradicional)
+
+
+    #Modelo MQO regularizad
+    modelo_mqo_regularizado = np.linalg.inv((X_treino.T @ X_treino) + melhorAlpha * np.identity((X_treino.T @ X_treino).shape[0]))@ X_treino.T @ Y_treino
+    print(modelo_mqo_regularizado)
 
 
 #print(X.shape)
