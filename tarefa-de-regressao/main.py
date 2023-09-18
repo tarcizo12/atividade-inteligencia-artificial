@@ -19,7 +19,7 @@ def criarTabela(valores, labelX, labelY,labelZ, title):
     fig, ax = plt.subplots(figsize=(4, 4))
     
     #Criar o gráfico de barras
-    ax.bar(labels, valores, color=['blue', 'green'])
+    ax.bar(labels, valores, color=['blue', 'green', 'red'])
 
     #Linha tracejada no valor máximo
     for i, valor in enumerate(valores):
@@ -132,7 +132,7 @@ for r in range(RODADAS_DE_TREINAMENTO):
     #Determinnar distancias
     MSE_MEDIA.append(np.mean((Y_teste-predicaoMedia)**2))
     MQO_TRADICIONAL.append(np.mean((Y_teste-predicaoModeloTradicional)**2))
-    MQO_REGULARIZADO.append(np.mean(Y_teste-peridocaoModeloRegularizado)**2)
+    MQO_REGULARIZADO.append(np.mean((Y_teste-peridocaoModeloRegularizado)**2))
 
 #Médias de EQM
 media_MVO = np.mean(MSE_MEDIA)
