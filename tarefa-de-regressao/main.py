@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 #1. visualização dos dados com um gráfico de dispressão
-def criarGrafico(tituloEixoY, tituloEixoX, labelDadoPlotado, titulo, X, Y, exibirGrafico):
+def criarGraficoDispressao(tituloEixoY, tituloEixoX, labelDadoPlotado, titulo, X, Y, exibirGrafico):
     if(exibirGrafico):
         plt.scatter(X ,Y , label=labelDadoPlotado)
         plt.xlabel(tituloEixoX)
@@ -11,6 +11,23 @@ def criarGrafico(tituloEixoY, tituloEixoX, labelDadoPlotado, titulo, X, Y, exibi
         plt.legend()
         plt.grid(True)
         plt.show() ## -> PLOTAR GRAFICO
+
+def criarTabela(valores, labelX, labelY, title):
+    labels = [labelX, labelY]
+    valores = [valores[0], valores[1]]
+
+    fig, ax = plt.subplots(figsize=(4, 4))
+    
+    #Criar o gráfico de barras
+    ax.bar(labels, valores, color=['blue', 'green'])
+
+    #Linha tracejada no valor máximo
+    for i, valor in enumerate(valores):
+        ax.axhline(valor, color='black', linestyle='--', label=f'Limite {labels[i]}: {valor}')
+    
+    
+    plt.title(title)
+
 
 TITULOS_EIXOS = {
     "X" :'Temperatura (°C)', 
@@ -105,11 +122,25 @@ print(desvioPadrao_MQO_TRADICIONAL, "Desvio Padrao para o MQO TRADICIONAL \n")
 print(menorValor_MVO, maiorValor_MVO, "Menor e maior valor para MVO \n")
 print(menorValor_MQO_TRADICIONAL, maiorValor_MQO_TRADICIONAL, "Menor e maior valor para MQO tradicional \n")
 
+
+iniciarTabelasInformativas = True
+iniciarGraficoDispresao = False
 #1. Plotando grafico
-criarGrafico(
+criarGraficoDispressao(
     TITULOS_EIXOS["X"], TITULOS_EIXOS["Y"],
     'Dados de Vendas de Sorvete','Relação entre Temperatura e Vendas de Sorvete',
-    X, Y, False)
+    X, Y, iniciarGraficoDispresao)
+
+if(iniciarTabelasInformativas):
+    criarTabela([media_MVO, media_MQO_TRADICIONAL], 'Média valores Observaveis', 'MQO tradicional','Média de EQM para os modelos')
+    criarTabela([desvioPadrao_MVO, desvioPadrao_MQO_TRADICIONAL], 'Média valores Observaveis', 'MQO tradicional','Desvio padrão')
+    criarTabela([menorValor_MVO, menorValor_MQO_TRADICIONAL], 'Média valores Observaveis', 'MQO tradicional','Menores valores de EQM')
+    criarTabela([maiorValor_MVO, maiorValor_MQO_TRADICIONAL], 'Média valores Observaveis', 'MQO tradicional','Maiores valores de EQM')
+    
+    # Exibir o gráfico
+    plt.show()
+
+#1. Plotando grafic
 
 
 #2. variaveis regressoras sejam armazenadas em uma matriz de dimensão N×p e o mesmo para varaiveis observadas, organizando em um vetor de dimensão N×1
