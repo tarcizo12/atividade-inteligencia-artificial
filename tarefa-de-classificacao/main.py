@@ -16,7 +16,7 @@ exibirModaDeCadaModelo = False
 iniciarTabelasInformativas =  True
 
 # 2. Definicao de rodadas
-RODADAS_DE_TREINAMENTO = 1
+RODADAS_DE_TREINAMENTO = 100
 
 ##Funcoes
 def encontrarAlpha(rodadasDeTreino, X, Y):
@@ -46,9 +46,9 @@ def encontrarAlpha(rodadasDeTreino, X, Y):
 
             Y_predicao = X_teste @ modelo_mqo_regularizado
 
-            descriminante_predicao = np.argmax(Y_predicao, axis=1)
-            descriminante_teste = np.argmax(Y_teste, axis=1)
-            acuaria_mqo_regularizado = accuracy_score(descriminante_predicao, descriminante_teste)
+            predicoes_classe = np.argmax(Y_predicao, axis=1)
+            classes_verdadeiras = np.argmax(Y_teste, axis=1)
+            acuaria_mqo_regularizado = accuracy_score(predicoes_classe, classes_verdadeiras)
 
             valoresDeAcuracias.append(acuaria_mqo_regularizado)
         
@@ -99,9 +99,9 @@ def encontrarValorDeK(rodadasDeTreino, X, Y):
 def determinarAcuracia(X_Teste, Y_teste,MODELO, label):
     Y_predicao = X_Teste @ MODELO
 
-    descriminante_predicao = np.argmax(Y_predicao, axis=1)
-    descriminante_teste = np.argmax(Y_teste, axis=1)
-    acuracia_modelo = accuracy_score(descriminante_predicao, descriminante_teste)
+    predicoes_classe = np.argmax(Y_predicao, axis=1)
+    classes_verdadeiras = np.argmax(Y_teste, axis=1)
+    acuracia_modelo = accuracy_score(predicoes_classe, classes_verdadeiras)
 
     if(label != ""):
         print("Modelo: " , label ,", Acurácia: " , acuracia_modelo , "\n")
@@ -204,6 +204,7 @@ X = np.concatenate((interceptorTreino , X),axis=1)
 
 melhorAlpha = encontrarAlpha(RODADAS_DE_TREINAMENTO, X , Y)
 melhorK = encontrarValorDeK(RODADAS_DE_TREINAMENTO, X, Y)
+print(melhorK)
 
 for rodada in range(RODADAS_DE_TREINAMENTO):
     indexRandom = np.random.permutation(N)
@@ -220,7 +221,7 @@ for rodada in range(RODADAS_DE_TREINAMENTO):
     X_teste =  X_embaralhado[indexOfOitentaPorCento: N,:] #Ir do ultimo index que representa os 80% até o fim
     Y_teste =  Y_embaralhado[indexOfOitentaPorCento: N,:]
 
-        #Modelo MQO regularizado 
+    #Modelo MQO regularizado 
     MODELO_MQO_REGULARIZADO = np.linalg.inv((X_treino.T @ X_treino) + melhorAlpha * np.identity((X_treino.T @ X_treino).shape[0]))@ X_treino.T @ Y_treino
     acuracia_mqo_regularizado = determinarAcuracia(X_teste, Y_teste, MODELO_MQO_REGULARIZADO, "")
     acuracia_MQO_REGULARIZADO_registros.append(acuracia_mqo_regularizado)
@@ -234,8 +235,8 @@ for rodada in range(RODADAS_DE_TREINAMENTO):
 
     #Dmc
     MODELO_DMC = dmc(X_treino, np.argmax(Y_treino, axis=1), X_teste)
-    descriminante_y_teste = np.argmax(Y_teste,axis=1)
-    acuracia_dmc =  accuracy_score(MODELO_DMC, descriminante_y_teste)
+    predicao_Y_teste = np.argmax(Y_teste,axis=1)
+    acuracia_dmc =  accuracy_score(MODELO_DMC, predicao_Y_teste)
     acuracia_DMC_registros.append(acuracia_dmc)
 
     #k-nn

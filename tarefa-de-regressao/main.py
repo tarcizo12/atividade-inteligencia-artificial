@@ -5,7 +5,7 @@ import matplotlib.ticker as ticker
 iniciarTabelasInformativas = True
 iniciarGraficoDispresao = False
 #3.Assim, defina essa quantidade de rodadas com o valor 1000.
-RODADAS_DE_TREINAMENTO = 20
+RODADAS_DE_TREINAMENTO = 1000
 
 def criarGraficoDispressao(tituloEixoY, tituloEixoX, labelDadoPlotado, titulo, X, Y, exibirGrafico):
     if(exibirGrafico):
