@@ -73,7 +73,7 @@ cores_por_expressao = [
 
 
 # Plotar cada expressão facial separadamente para adicionar legenda
-if(False):
+if(True):
     for i, expressao in enumerate(expressoes):
         dados_expressao = df[df['Expressao'] == expressao]
         plt.scatter(dados_expressao['Sensor1'], dados_expressao['Sensor2'],
