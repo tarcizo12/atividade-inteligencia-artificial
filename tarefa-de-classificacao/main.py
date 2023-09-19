@@ -69,7 +69,7 @@ def determinarAcuracia(X_Teste, Y_teste,MODELO, label):
         print("Modelo: " , label ,", Acurácia: " , acuracia_modelo , "\n")
 
     return acuracia_modelo
-
+    
 def distancia_euclidiana(x1, x2):
     """Calcula a distância euclidiana entre dois pontos."""
     return np.sqrt(np.sum((x1 - x2) ** 2))
@@ -78,10 +78,15 @@ def knn_classificador(X_treino, y_treino, X_teste, k):
     """Classificador k-NN simples."""
     y_pred = []
     for i in range(len(X_teste)):
+        print(i)
         distancias = [distancia_euclidiana(X_treino[j], X_teste[i]) for j in range(len(X_treino))]
         indices_vizinhos = np.argsort(distancias)[:k]
         vizinhos = [y_treino[idx] for idx in indices_vizinhos]
-        classe_mais_frequente = np.bincount(vizinhos).argmax()
+        
+        # Encontre a classe mais frequente usando a função numpy unique
+        classes, counts = np.unique(vizinhos, return_counts=True)
+        classe_mais_frequente = classes[np.argmax(counts)]
+        
         y_pred.append(classe_mais_frequente)
     return np.array(y_pred)
 
@@ -117,7 +122,7 @@ if(False):
 
 
 # 2
-RODADAS_DE_TREINAMENTO = 5
+RODADAS_DE_TREINAMENTO = 1
 
 ##Modelos para implementação
 MQO_TRADICIONAL = [] #Modelo com intercepitor
@@ -151,14 +156,17 @@ for rodada in range(RODADAS_DE_TREINAMENTO):
 
         #Modelo MQO regularizado 
     MODELO_MQO_REGULARIZADO = np.linalg.inv((X_treino.T @ X_treino) + melhorAlpha * np.identity((X_treino.T @ X_treino).shape[0]))@ X_treino.T @ Y_treino
-    acuracia_mqo_regularizado = determinarAcuracia(X_teste, Y_teste, MODELO_MQO_REGULARIZADO, "regularizado")
+    acuracia_mqo_regularizado = determinarAcuracia(X_teste, Y_teste, MODELO_MQO_REGULARIZADO, "")
     acuracia_MQO_REGULARIZADO_registros.append(acuracia_mqo_regularizado)
 
 
     #Modelo MQO tradicional - com interceptor
     MODELO_MQO_TRADICIONAL = np.linalg.pinv(X_treino.T@X_treino)@X_treino.T@Y_treino
-    acuracia_mqo_tradicional = determinarAcuracia(X_teste, Y_teste, MODELO_MQO_TRADICIONAL, "tradicional")
+    acuracia_mqo_tradicional = determinarAcuracia(X_teste, Y_teste, MODELO_MQO_TRADICIONAL, "")
     acuracia_MQO_TRADICIONAL_registros.append(acuracia_mqo_tradicional)
+
+    y_pred = knn_classificador(X_treino, Y_treino, X_teste, 2)
+    print(y_pred)
 
 
     

@@ -69,7 +69,7 @@ TITULOS_EIXOS = {
 }
 
 #3.Assim, defina essa quantidade de rodadas com o valor 1000.
-RODADAS_DE_TREINAMENTO = 100
+RODADAS_DE_TREINAMENTO = 1
 
 #1.Extração de dados para visualização dos dados com um gráfico de dispressão
 Data = np.loadtxt("base-de-dados/Ice_cream selling data.csv",delimiter=',', skiprows = 1)
@@ -120,7 +120,6 @@ for r in range(RODADAS_DE_TREINAMENTO):
 
     #Modelo MQO regularizado
     MODELO_MQO_REGULARIZADO = np.linalg.inv((X_treino.T @ X_treino) + alphaMinimo * np.identity((X_treino.T @ X_treino).shape[0]))@ X_treino.T @ Y_treino
-    
 
     #Calcular médias EQM
     interceptorTeste = np.ones((X_teste.shape[0],1))
