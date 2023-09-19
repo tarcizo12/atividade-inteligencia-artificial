@@ -61,7 +61,6 @@ def definirAlphaMinimo(rodadasDeTreino, X, Y):
             minValue = mediaAlphaAtual
             alphaMinimo = alphaAtual
 
-    print(alphaMinimo)
     return alphaMinimo
 
 TITULOS_EIXOS = {
