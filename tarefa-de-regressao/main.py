@@ -4,6 +4,8 @@ import matplotlib.ticker as ticker
 
 iniciarTabelasInformativas = True
 iniciarGraficoDispresao = False
+#3.Assim, defina essa quantidade de rodadas com o valor 1000.
+RODADAS_DE_TREINAMENTO = 20
 
 def criarGraficoDispressao(tituloEixoY, tituloEixoX, labelDadoPlotado, titulo, X, Y, exibirGrafico):
     if(exibirGrafico):
@@ -73,9 +75,6 @@ TITULOS_EIXOS = {
     "X" :'Temperatura (°C)', 
     "Y" : 'Vendas de Sorvete (unidades)'
 }
-
-#3.Assim, defina essa quantidade de rodadas com o valor 1000.
-RODADAS_DE_TREINAMENTO = 20
 
 #1.Extração de dados para visualização dos dados com um gráfico de dispressão
 Data = np.loadtxt("base-de-dados/Ice_cream selling data.csv",delimiter=',', skiprows = 1)
