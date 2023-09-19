@@ -1,7 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 
-#1. visualização dos dados com um gráfico de dispressão
+iniciarTabelasInformativas = True
+iniciarGraficoDispresao = False
+
 def criarGraficoDispressao(tituloEixoY, tituloEixoX, labelDadoPlotado, titulo, X, Y, exibirGrafico):
     if(exibirGrafico):
         plt.scatter(X ,Y , label=labelDadoPlotado)
@@ -27,6 +30,9 @@ def criarTabela(valores, labelX, labelY,labelZ, title):
     
     
     plt.title(title)
+
+    num_ticks = 10
+    ax.yaxis.set_major_locator(ticker.LinearLocator(num_ticks))
 
 def definirAlphaMinimo(rodadasDeTreino, X, Y):
     # Gere N valores no intervalo 0 < λ ≤ 1
@@ -69,7 +75,7 @@ TITULOS_EIXOS = {
 }
 
 #3.Assim, defina essa quantidade de rodadas com o valor 1000.
-RODADAS_DE_TREINAMENTO = 1
+RODADAS_DE_TREINAMENTO = 20
 
 #1.Extração de dados para visualização dos dados com um gráfico de dispressão
 Data = np.loadtxt("base-de-dados/Ice_cream selling data.csv",delimiter=',', skiprows = 1)
@@ -159,9 +165,6 @@ maiorValor_MQO_REGULARIZADO = np.amax(MQO_REGULARIZADO)
 # print(menorValor_MVO, maiorValor_MVO, "Menor e maior valor para MVO \n")
 # print(menorValor_MQO_TRADICIONAL, maiorValor_MQO_TRADICIONAL, "Menor e maior valor para MQO tradicional \n")
 
-
-iniciarTabelasInformativas = False
-iniciarGraficoDispresao = False
 #1. Plotando grafico
 criarGraficoDispressao(
     TITULOS_EIXOS["X"], TITULOS_EIXOS["Y"],

@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 from sklearn.metrics import accuracy_score
 from sklearn.neighbors import KNeighborsClassifier
 import statistics
@@ -11,7 +12,8 @@ exibirInformacoesDeMedia = False
 plotarGraficoDispresao =  False
 exibirInformacoesDeDesvioPadrao = False 
 exibirInformacoesDeMaioresEMenoresValores = False
-exibirModaDeCadaModelo = True
+exibirModaDeCadaModelo = False
+iniciarTabelasInformativas =  True
 
 # 2. Definicao de rodadas
 RODADAS_DE_TREINAMENTO = 1
@@ -127,6 +129,24 @@ def dmc(X_treino, Y_treino, X_teste):
 
 def printInformacao(label, valor, modelo):
     print(f'\n{label} {modelo} {valor}%')
+
+def criarTabela(valores, labelX, labelY,labelZ,labelW, title):
+    labels = [labelX, labelY, labelZ, labelW]
+    valores = [valores[0], valores[1], valores[2], valores[3]]
+
+    fig, ax = plt.subplots(figsize=(4, 4))
+
+    # Criar o gráfico de barras
+    ax.bar(labels, valores, color=['blue', 'green', 'red', 'purple'])
+
+    # Linha tracejada no valor máximo
+    for i, valor in enumerate(valores):
+        ax.axhline(valor, color='black', linestyle='--', label=f'Limite {labels[i]}: {valor}')
+
+    plt.title(title)
+
+    num_ticks = 15  
+    ax.yaxis.set_major_locator(ticker.LinearLocator(num_ticks))
 
 ##Extraindo informações
 df = pd.read_csv('./base-de-dados/EMG.csv', header=None,
@@ -289,7 +309,21 @@ if(exibirModaDeCadaModelo):
 
 
 
-
+##Plotar Grafico de tabelas
+if(iniciarTabelasInformativas):
+    criarTabela([media_dmc, media_knn, media_mqo_tradicional, media_mqo_regularizado], 
+                'DMC ', 'K-NN','MQO tradicional','MQO regularizado','Média de acurácia para os modelos')
+    criarTabela([desvioPadrao_dmc, desvioPadrao_knn, desvioPadrao_mqo_tradicional, desvioPadrao_mqo_regularizado], 
+                'DMC ', 'K-NN','MQO tradicional','MQO regularizado','Desvio padrão de acurácia para os modelos')
+    criarTabela([menorValor_dmc, menorValor_knn, menorValor_mqo_tradicional, menorValor_mqo_regularizado],
+                'DMC ', 'K-NN','MQO tradicional','MQO regularizado','Menores valores de acurácia para os modelos')
+    criarTabela([maiorValor_dmc, maiorValor_knn, maiorValor_mqo_tradicional, maiorValor_mqo_regularizado], 
+                'DMC ', 'K-NN','MQO tradicional','MQO regularizado','Maiores valores de acurácia para os modelos')
+    criarTabela([moda_dmc, moda_knn, moda_mqo_tradicional, moda_mqo_regularizado], 
+                'DMC ', 'K-NN','MQO tradicional','MQO regularizado','Moda de acurácia para os modelos')
+    
+    # Exibir o gráfico
+    plt.show()
     
 
     
