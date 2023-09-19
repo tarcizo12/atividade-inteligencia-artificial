@@ -68,27 +68,26 @@ def determinarAcuracia(X_Teste, Y_teste,MODELO, label):
     if(label != ""):
         print("Modelo: " , label ,", Acurácia: " , acuracia_modelo , "\n")
 
-    return acuracia_modelo
-    
-def distancia_euclidiana(x1, x2):
-    """Calcula a distância euclidiana entre dois pontos."""
-    return np.sqrt(np.sum((x1 - x2) ** 2))
+    return acuracia_modelo 
 
-def knn_classificador(X_treino, y_treino, X_teste, k):
-    """Classificador k-NN simples."""
-    y_pred = []
-    for i in range(len(X_teste)):
+def dmc(X_treino, Y_treino, X_teste):
+    classes = np.unique(Y_treino)
+    previsoes = []
+    i = 0 
+    for amostra_teste in X_teste:
         print(i)
-        distancias = [distancia_euclidiana(X_treino[j], X_teste[i]) for j in range(len(X_treino))]
-        indices_vizinhos = np.argsort(distancias)[:k]
-        vizinhos = [y_treino[idx] for idx in indices_vizinhos]
+        distancias = []
+        i = i + 1
+        for classe in classes:
+            centroides_classe = X_treino[Y_treino == classe]
+            centroide = np.mean(centroides_classe, axis=0)
+            distancia = np.linalg.norm(amostra_teste - centroide)
+            distancias.append(distancia)
         
-        # Encontre a classe mais frequente usando a função numpy unique
-        classes, counts = np.unique(vizinhos, return_counts=True)
-        classe_mais_frequente = classes[np.argmax(counts)]
-        
-        y_pred.append(classe_mais_frequente)
-    return np.array(y_pred)
+        classe_mais_proxima = classes[np.argmin(distancias)]
+        previsoes.append(classe_mais_proxima)
+
+    return np.array(previsoes)
 
     
 # Identificar a expressão correspondente a cada bloco de 10.000 observações
@@ -165,8 +164,11 @@ for rodada in range(RODADAS_DE_TREINAMENTO):
     acuracia_mqo_tradicional = determinarAcuracia(X_teste, Y_teste, MODELO_MQO_TRADICIONAL, "")
     acuracia_MQO_TRADICIONAL_registros.append(acuracia_mqo_tradicional)
 
-    y_pred = knn_classificador(X_treino, Y_treino, X_teste, 2)
-    print(y_pred)
+    modelo_dmc = dmc(X_treino, np.argmax(Y_treino, axis=1), X_teste)
+    descriminante_y_teste = np.argmax(Y_teste,axis=1)
+    acuracia_dmc =  accuracy_score(modelo_dmc, descriminante_y_teste)
+
+    print(acuracia_dmc)
 
 
     
