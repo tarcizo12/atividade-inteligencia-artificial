@@ -3,23 +3,20 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.metrics import accuracy_score
 from sklearn.neighbors import KNeighborsClassifier
-
-# Vamos supor que o arquivo está no mesmo diretório do script e se chama 'dados.csv'
-df = pd.read_csv('./base-de-dados/EMG.csv', header=None,
-                 names=['Sensor1', 'Sensor2'])
-
-#Definição para as variaveis X e Y
-X = df.values
-N,p = X.shape
-
-neutro = np.tile(np.array([[1,-1,-1,-1,-1]]),(1000,1)) 
-sorrindo = np.tile(np.array([[-1,1,-1,-1,-1]]),(1000,1)) 
-aberto = np.tile(np.array([[-1,-1,1,-1,-1]]),(1000,1)) 
-surpreso = np.tile(np.array([[-1,-1,-1,1,-1]]),(1000,1)) 
-rabugento = np.tile(np.array([[-1,-1,-1,-1,1]]),(1000,1)) 
-Y = np.tile(np.concatenate((neutro,sorrindo,aberto,surpreso,rabugento)),(10,1))
+import statistics
 
 
+##Exibir graficos
+exibirInformacoesDeMedia = False
+plotarGraficoDispresao =  False
+exibirInformacoesDeDesvioPadrao = False 
+exibirInformacoesDeMaioresEMenoresValores = False
+exibirModaDeCadaModelo = True
+
+# 2. Definicao de rodadas
+RODADAS_DE_TREINAMENTO = 1
+
+##Funcoes
 def encontrarAlpha(rodadasDeTreino, X, Y):
     # Gere N valores no intervalo 0 < λ ≤ 1
     valoresParaAlpha =  np.arange(0.01, 1.01, 0.01) 
@@ -59,6 +56,44 @@ def encontrarAlpha(rodadasDeTreino, X, Y):
 
     return alphaMaximoProcurado
 
+def encontrarValorDeK(rodadasDeTreino, X, Y):
+    # Gere N valores no intervalo 0 < λ ≤ 1
+    valoresParaK =  list(range(1, 21))
+    kProcurado = -1
+    maxValue = -1
+
+    for kAtual in valoresParaK:
+        valoresDeAcuracias = []
+        print("K atual: ", kAtual)
+        
+        if(kAtual % 2 != 0):
+            for rodada in range(rodadasDeTreino):
+                indexRandom = np.random.permutation(N)
+                indexOfOitentaPorCento = int(N*.8)
+
+                #Embaralhar dados
+                X_embaralhado = X[indexRandom,:]
+                Y_embaralhado = Y[indexRandom,:]
+
+                #6. Amostra para treino e teste 
+                X_treino = X_embaralhado[0: indexOfOitentaPorCento,:] #Ir de Zero até o index 80% total (no caso é 39)
+                Y_treino = Y_embaralhado[0: indexOfOitentaPorCento,:]
+                X_teste =  X_embaralhado[indexOfOitentaPorCento: N,:] #Ir do ultimo index que representa os 80% até o fim
+                Y_teste =  Y_embaralhado[indexOfOitentaPorCento: N,:]
+    
+                k = kAtual
+                MODELO_KNN = KNeighborsClassifier(n_neighbors= k)
+                MODELO_KNN.fit(X_treino, Y_treino)
+                Y_predicao_knn = MODELO_KNN.predict(X_teste)
+                acuracia_knn = accuracy_score(Y_teste, Y_predicao_knn)
+                valoresDeAcuracias.append(acuracia_knn)
+        
+            if(np.mean(valoresDeAcuracias) > maxValue):
+                maxValue = np.mean(valoresDeAcuracias)
+                kProcurado = kAtual
+
+    return kProcurado
+
 def determinarAcuracia(X_Teste, Y_teste,MODELO, label):
     Y_predicao = X_Teste @ MODELO
 
@@ -76,7 +111,7 @@ def dmc(X_treino, Y_treino, X_teste):
     previsoes = []
     i = 0 
     for amostra_teste in X_teste:
-        print(i)
+        print("Amostra de dmc atual: ", i)
         distancias = []
         i = i + 1
         for classe in classes:
@@ -90,7 +125,24 @@ def dmc(X_treino, Y_treino, X_teste):
 
     return np.array(previsoes)
 
-    
+def printInformacao(label, valor, modelo):
+    print(f'\n{label} {modelo} {valor}%')
+
+##Extraindo informações
+df = pd.read_csv('./base-de-dados/EMG.csv', header=None,
+                 names=['Sensor1', 'Sensor2'])
+
+#Definição para as variaveis X e Y
+X = df.values
+N,p = X.shape
+
+neutro = np.tile(np.array([[1,-1,-1,-1,-1]]),(1000,1)) 
+sorrindo = np.tile(np.array([[-1,1,-1,-1,-1]]),(1000,1)) 
+aberto = np.tile(np.array([[-1,-1,1,-1,-1]]),(1000,1)) 
+surpreso = np.tile(np.array([[-1,-1,-1,1,-1]]),(1000,1)) 
+rabugento = np.tile(np.array([[-1,-1,-1,-1,1]]),(1000,1)) 
+Y = np.tile(np.concatenate((neutro,sorrindo,aberto,surpreso,rabugento)),(10,1))
+
 # Identificar a expressão correspondente a cada bloco de 10.000 observações
 expressoes = ['Neutro', 'Sorrindo', 'Aberto', 'Surpreso', 'Rabugento']
 expressoes_repetidas = [expressao for expressao in expressoes for _ in range(10000)]
@@ -107,7 +159,7 @@ cores_por_expressao = [
 
 
 # Plotar cada expressão facial separadamente para adicionar legenda
-if(False):
+if(plotarGraficoDispresao):
     for i, expressao in enumerate(expressoes):
         dados_expressao = df[df['Expressao'] == expressao]
         plt.scatter(dados_expressao['Sensor1'], dados_expressao['Sensor2'],
@@ -120,24 +172,18 @@ if(False):
     plt.show()
 
 
-
-# 2
-RODADAS_DE_TREINAMENTO = 1
-
-##Modelos para implementação
-MQO_TRADICIONAL = [] #Modelo com intercepitor
-MQO_REGULARIZADO = []
-
-
-melhorAlpha = encontrarAlpha(RODADAS_DE_TREINAMENTO, X , Y)
-
+#Precisão
 acuracia_MQO_TRADICIONAL_registros = []
 acuracia_MQO_REGULARIZADO_registros = []
+acuracia_DMC_registros = []
+acuracia_KNN_registros = []
 
 
 interceptorTreino = np.ones((X.shape[0] , 1)) 
 X = np.concatenate((interceptorTreino , X),axis=1)
 
+melhorAlpha = encontrarAlpha(RODADAS_DE_TREINAMENTO, X , Y)
+melhorK = encontrarValorDeK(RODADAS_DE_TREINAMENTO, X, Y)
 
 for rodada in range(RODADAS_DE_TREINAMENTO):
     indexRandom = np.random.permutation(N)
@@ -167,16 +213,83 @@ for rodada in range(RODADAS_DE_TREINAMENTO):
 
 
     #Dmc
-    ##modelo_dmc = dmc(X_treino, np.argmax(Y_treino, axis=1), X_teste)
-    ##descriminante_y_teste = np.argmax(Y_teste,axis=1)
-    ##acuracia_dmc =  accuracy_score(modelo_dmc, descriminante_y_teste)
+    MODELO_DMC = dmc(X_treino, np.argmax(Y_treino, axis=1), X_teste)
+    descriminante_y_teste = np.argmax(Y_teste,axis=1)
+    acuracia_dmc =  accuracy_score(MODELO_DMC, descriminante_y_teste)
+    acuracia_DMC_registros.append(acuracia_dmc)
 
     #k-nn
-    # Criar e treinar o modelo k-NN
-    knn1 = KNeighborsClassifier(n_neighbors=3)
-    knn1.fit(X_treino, Y_treino)
-    y_pred_1 = knn1.predict(X_teste)
-    print("Accuracy with k=1", accuracy_score(Y_teste, y_pred_1))
+    k = melhorK
+    MODELO_KNN = KNeighborsClassifier(n_neighbors= k)
+    MODELO_KNN.fit(X_treino, Y_treino)
+    Y_predicao_knn = MODELO_KNN.predict(X_teste)
+    acuracia_knn = accuracy_score(Y_teste, Y_predicao_knn)
+    acuracia_KNN_registros.append(acuracia_knn)
 
+
+media_dmc = np.mean(acuracia_DMC_registros)*100
+media_knn = np.mean(acuracia_KNN_registros)*100
+media_mqo_tradicional = np.mean(acuracia_MQO_TRADICIONAL_registros)*100
+media_mqo_regularizado = np.mean(acuracia_MQO_REGULARIZADO_registros)*100
+
+desvioPadrao_dmc = np.std(acuracia_DMC_registros)
+desvioPadrao_knn =  np.std(acuracia_KNN_registros)
+desvioPadrao_mqo_tradicional = np.std(acuracia_MQO_TRADICIONAL_registros)
+desvioPadrao_mqo_regularizado = np.std(acuracia_MQO_REGULARIZADO_registros)
+
+#Menores Valores
+menorValor_dmc = np.amin(acuracia_DMC_registros)*100
+menorValor_knn = np.amin(acuracia_KNN_registros)*100
+menorValor_mqo_tradicional = np.amin(acuracia_MQO_TRADICIONAL_registros)*100
+menorValor_mqo_regularizado = np.amin(acuracia_MQO_REGULARIZADO_registros)*100
+
+#MaioresValores
+maiorValor_dmc = np.amax(acuracia_DMC_registros)*100
+maiorValor_knn = np.amax(acuracia_KNN_registros)*100
+maiorValor_mqo_tradicional = np.amax(acuracia_MQO_TRADICIONAL_registros)*100
+maiorValor_mqo_regularizado = np.amax(acuracia_MQO_REGULARIZADO_registros)*100
+
+#Moda
+moda_dmc = statistics.mode(acuracia_DMC_registros)*100
+moda_knn = statistics.mode(acuracia_KNN_registros)*100
+moda_mqo_tradicional = statistics.mode(acuracia_MQO_TRADICIONAL_registros)*100
+moda_mqo_regularizado = statistics.mode(acuracia_MQO_REGULARIZADO_registros)*100
+
+
+if(exibirInformacoesDeMedia):
+    printInformacao("Media:", media_dmc, "DCM")
+    printInformacao("Media:", media_knn,"Knn")
+    printInformacao("Media:", media_mqo_tradicional, "MQO Tradicional")
+    printInformacao("Media:",media_mqo_regularizado,"MQO Regularizado")
+
+
+if(exibirInformacoesDeDesvioPadrao):
+    printInformacao("Desvio:", desvioPadrao_dmc, "DCM")
+    printInformacao("Desvio:", desvioPadrao_knn,"Knn")
+    printInformacao("Desvio:", desvioPadrao_mqo_tradicional, "MQO Tradicional")
+    printInformacao("Desvio:",desvioPadrao_mqo_regularizado,"MQO Regularizado")
+
+
+if(exibirInformacoesDeMaioresEMenoresValores):
+    printInformacao("Maior valor:", maiorValor_dmc, "DCM")
+    printInformacao("Maior valor:", desvioPadrao_knn,"Knn")
+    printInformacao("Maior valor:", maiorValor_knn, "MQO Tradicional")
+    printInformacao("Maior valor:", maiorValor_mqo_regularizado,"MQO Regularizado")
+    
+    printInformacao("Menor Valor:", menorValor_dmc, "MQO Tradicional")
+    printInformacao("Menor Valor:",menorValor_knn,"MQO Regularizado")
+    printInformacao("Menor Valor:",menorValor_mqo_tradicional,"MQO Regularizado")
+    printInformacao("Menor Valor:",menorValor_mqo_regularizado,"MQO Regularizado")
+
+if(exibirModaDeCadaModelo):
+    printInformacao("Moda:", moda_dmc, "DCM")
+    printInformacao("Moda:", moda_knn,"Knn")
+    printInformacao("Moda:", moda_mqo_tradicional, "MQO Tradicional")
+    printInformacao("Moda:", moda_mqo_regularizado,"MQO Regularizado")
+
+
+
+
+    
 
     
