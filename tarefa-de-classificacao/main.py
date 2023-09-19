@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.metrics import accuracy_score
+from sklearn.neighbors import KNeighborsClassifier
 
 # Vamos supor que o arquivo está no mesmo diretório do script e se chama 'dados.csv'
 df = pd.read_csv('./base-de-dados/EMG.csv', header=None,
@@ -164,11 +165,18 @@ for rodada in range(RODADAS_DE_TREINAMENTO):
     acuracia_mqo_tradicional = determinarAcuracia(X_teste, Y_teste, MODELO_MQO_TRADICIONAL, "")
     acuracia_MQO_TRADICIONAL_registros.append(acuracia_mqo_tradicional)
 
-    modelo_dmc = dmc(X_treino, np.argmax(Y_treino, axis=1), X_teste)
-    descriminante_y_teste = np.argmax(Y_teste,axis=1)
-    acuracia_dmc =  accuracy_score(modelo_dmc, descriminante_y_teste)
 
-    print(acuracia_dmc)
+    #Dmc
+    ##modelo_dmc = dmc(X_treino, np.argmax(Y_treino, axis=1), X_teste)
+    ##descriminante_y_teste = np.argmax(Y_teste,axis=1)
+    ##acuracia_dmc =  accuracy_score(modelo_dmc, descriminante_y_teste)
+
+    #k-nn
+    # Criar e treinar o modelo k-NN
+    knn1 = KNeighborsClassifier(n_neighbors=3)
+    knn1.fit(X_treino, Y_treino)
+    y_pred_1 = knn1.predict(X_teste)
+    print("Accuracy with k=1", accuracy_score(Y_teste, y_pred_1))
 
 
     
