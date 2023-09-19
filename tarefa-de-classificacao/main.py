@@ -18,9 +18,10 @@ surpreso = np.tile(np.array([[-1,-1,-1,1,-1]]),(1000,1))
 rabugento = np.tile(np.array([[-1,-1,-1,-1,1]]),(1000,1)) 
 Y = np.tile(np.concatenate((neutro,sorrindo,aberto,surpreso,rabugento)),(10,1))
 
+
 def encontrarAlpha(rodadasDeTreino, X, Y):
     # Gere N valores no intervalo 0 < λ ≤ 1
-    valoresParaAlpha =  np.arange(0.001, 1.001, 0.001) 
+    valoresParaAlpha =  np.arange(0.01, 1.01, 0.01) 
     alphaMaximoProcurado = 1
     maxValue = -1
 
@@ -57,6 +58,34 @@ def encontrarAlpha(rodadasDeTreino, X, Y):
 
     return alphaMaximoProcurado
 
+def determinarAcuracia(X_Teste, Y_teste,MODELO, label):
+    Y_predicao = X_Teste @ MODELO
+
+    descriminante_predicao = np.argmax(Y_predicao, axis=1)
+    descriminante_teste = np.argmax(Y_teste, axis=1)
+    acuracia_modelo = accuracy_score(descriminante_predicao, descriminante_teste)
+
+    if(label != ""):
+        print("Modelo: " , label ,", Acurácia: " , acuracia_modelo , "\n")
+
+    return acuracia_modelo
+
+def distancia_euclidiana(x1, x2):
+    """Calcula a distância euclidiana entre dois pontos."""
+    return np.sqrt(np.sum((x1 - x2) ** 2))
+
+def knn_classificador(X_treino, y_treino, X_teste, k):
+    """Classificador k-NN simples."""
+    y_pred = []
+    for i in range(len(X_teste)):
+        distancias = [distancia_euclidiana(X_treino[j], X_teste[i]) for j in range(len(X_treino))]
+        indices_vizinhos = np.argsort(distancias)[:k]
+        vizinhos = [y_treino[idx] for idx in indices_vizinhos]
+        classe_mais_frequente = np.bincount(vizinhos).argmax()
+        y_pred.append(classe_mais_frequente)
+    return np.array(y_pred)
+
+    
 # Identificar a expressão correspondente a cada bloco de 10.000 observações
 expressoes = ['Neutro', 'Sorrindo', 'Aberto', 'Surpreso', 'Rabugento']
 expressoes_repetidas = [expressao for expressao in expressoes for _ in range(10000)]
@@ -73,7 +102,7 @@ cores_por_expressao = [
 
 
 # Plotar cada expressão facial separadamente para adicionar legenda
-if(True):
+if(False):
     for i, expressao in enumerate(expressoes):
         dados_expressao = df[df['Expressao'] == expressao]
         plt.scatter(dados_expressao['Sensor1'], dados_expressao['Sensor2'],
@@ -88,7 +117,7 @@ if(True):
 
 
 # 2
-RODADAS_DE_TREINAMENTO = 1
+RODADAS_DE_TREINAMENTO = 5
 
 ##Modelos para implementação
 MQO_TRADICIONAL = [] #Modelo com intercepitor
@@ -97,10 +126,13 @@ MQO_REGULARIZADO = []
 
 melhorAlpha = encontrarAlpha(RODADAS_DE_TREINAMENTO, X , Y)
 
-acuracia_MQO_TRADICIONAL = []
-acuracia_MQO_REGULARIZADO = []
+acuracia_MQO_TRADICIONAL_registros = []
+acuracia_MQO_REGULARIZADO_registros = []
 
-print(melhorAlpha)
+
+interceptorTreino = np.ones((X.shape[0] , 1)) 
+X = np.concatenate((interceptorTreino , X),axis=1)
+
 
 for rodada in range(RODADAS_DE_TREINAMENTO):
     indexRandom = np.random.permutation(N)
@@ -117,15 +149,16 @@ for rodada in range(RODADAS_DE_TREINAMENTO):
     X_teste =  X_embaralhado[indexOfOitentaPorCento: N,:] #Ir do ultimo index que representa os 80% até o fim
     Y_teste =  Y_embaralhado[indexOfOitentaPorCento: N,:]
 
-    #Modelo MQO tradicionao - com interceptor
+        #Modelo MQO regularizado 
+    MODELO_MQO_REGULARIZADO = np.linalg.inv((X_treino.T @ X_treino) + melhorAlpha * np.identity((X_treino.T @ X_treino).shape[0]))@ X_treino.T @ Y_treino
+    acuracia_mqo_regularizado = determinarAcuracia(X_teste, Y_teste, MODELO_MQO_REGULARIZADO, "regularizado")
+    acuracia_MQO_REGULARIZADO_registros.append(acuracia_mqo_regularizado)
+
+
+    #Modelo MQO tradicional - com interceptor
     MODELO_MQO_TRADICIONAL = np.linalg.pinv(X_treino.T@X_treino)@X_treino.T@Y_treino
-    Y_predicao = X_teste @ MODELO_MQO_TRADICIONAL
-
-    descriminante_predicao = np.argmax(Y_predicao, axis=1)
-    descriminante_teste = np.argmax(Y_teste, axis=1)
-    acuracia_mqo_tradicional = accuracy_score(descriminante_predicao, descriminante_teste)
-    acuracia_MQO_TRADICIONAL.append(acuracia_mqo_tradicional)
+    acuracia_mqo_tradicional = determinarAcuracia(X_teste, Y_teste, MODELO_MQO_TRADICIONAL, "tradicional")
+    acuracia_MQO_TRADICIONAL_registros.append(acuracia_mqo_tradicional)
 
 
-    #Modelo MQO regularizad
-    ##modelo_mqo_regularizado = np.linalg.inv((X_treino.T @ X_treino) + melhorAlpha * np.identity((X_treino.T @ X_treino).shape[0]))@ X_treino.T @ Y_treino
+    
